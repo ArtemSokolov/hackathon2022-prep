@@ -35,6 +35,7 @@ sn <- set_names(10:21, ct) %>%
 ## Load and clean up all registrant information
 X <- read_csv(ifn, col_types=cols()) %>%
     rename(!!!sn) %>% select(-Timestamp) %>%
+    group_by(Email) %>% slice(n()) %>% ungroup() %>%
     mutate(across(all_of(ct), replace_na,  "Not interested"))
 
 stopifnot(anyNA(X)==FALSE)
