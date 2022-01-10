@@ -62,27 +62,22 @@ MAT[[2]] <- kronecker( t(rep(1,nc)), diag(np) )
 DIR[[2]] <- rep("<=", np)
 RHS[[2]] <- rep(1, np)
 
-## 3. Each challenge has at least the average number of participants
-MAT[[3]] <- kronecker( diag(nc), t(rep(1,np)) )
-DIR[[3]] <- rep(">=", nc)
-RHS[[3]] <- rep(floor(np/nc), nc)
-
-## 4. The difference in the number of participants between any
+## 3. The difference in the number of participants between any
 ##    two challenges is not greater than 1
-MAT[[4]] <- map(1:nc, ~`[<-`(-diag(nc)[-.x,],,.x,1)) %>%
+MAT[[3]] <- map(1:nc, ~`[<-`(-diag(nc)[-.x,],,.x,1)) %>%
     do.call(rbind, .) %>% kronecker( t(rep(1,np)) )
-DIR[[4]] <- rep("<=", nc*(nc-1))
-RHS[[4]] <- rep(1, nc*(nc-1))
+DIR[[3]] <- rep("<=", nc*(nc-1))
+RHS[[3]] <- rep(1, nc*(nc-1))
 
-## 5. Each challenge includes at least one person with a GPU
-MAT[[5]] <- kronecker( diag(nc), t(as.integer(X$GPU == "Yes")) )
+## 4. Each challenge includes at least one person with a GPU
+MAT[[4]] <- kronecker( diag(nc), t(as.integer(X$GPU == "Yes")) )
+DIR[[4]] <- rep(">=", nc)
+RHS[[4]] <- rep(1, nc)
+
+## 5. Each challenge includes adequate image analysis expertise
+MAT[[5]] <- kronecker( diag(nc), t(as.integer(X$Experience >= 4)) )
 DIR[[5]] <- rep(">=", nc)
 RHS[[5]] <- rep(1, nc)
-
-## 6. Each challenge includes adequate image analysis expertise
-MAT[[6]] <- kronecker( diag(nc), t(as.integer(X$Experience >= 4)) )
-DIR[[6]] <- rep(">=", nc)
-RHS[[6]] <- rep(1, nc)
 
 ## Solve via integer programming
 Z <- lpSolve::lp(direction    = 'max',
@@ -107,5 +102,5 @@ Y %>% group_by(Assignment) %>%
     summarize(nGPU    = sum(GPU == "Yes"),
               nExpert = sum(Experience >= 4))
 
-Y %>% select( Assignment, Name, Email, everything() ) %>%
+Y %>% select(Assignment, Name, Email, everything()) %>%
     write_csv("data/assignment.csv")
