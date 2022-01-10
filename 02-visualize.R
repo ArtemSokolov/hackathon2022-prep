@@ -1,13 +1,6 @@
 library(tidyverse)
 library(seriation)
 
-## Plot elements to remove (petr)
-petr <- c("axis.text.x",
-          "axis.ticks.x",
-          "panel.grid.major",
-          "panel.grid.minor") %>%
-    set_names() %>% map(~element_blank())
-
 ## Intereset level (il)
 il <- c("Very interested"     = 3,
         "Somewhat interested" = 2,
@@ -27,17 +20,33 @@ olo <- hclust(DM) %>% reorder(DM) %>%
     dendextend::order.hclust() %>% labels(DM)[.]
 
 ## Overall view of registrant interest in the challenges
-Z <- X %>% select(Assignment, Name, all_of(ct)) %>%
+## Abusing Assignment column to store legend labels
+Z <- X %>% select(Assignment, Name, Experience, GPU, all_of(ct)) %>%
     pivot_longer(all_of(ct), names_to="Challenge", values_to="Interest") %>%
-    mutate(Assigned = ifelse(Challenge == Assignment, "Yes", "No"),
-           Name      = factor(Name, levels=olo),
-           Challenge = factor(Challenge, rev(ct)))
+    mutate(Assignment = ifelse(Challenge == Assignment, "Experience", "No"),
+           Name       = factor(Name, levels=olo),
+           Challenge  = factor(Challenge, rev(ct)))
+ZA <- filter(Z, Assignment == "Experience")
 
-## Plot everything
+## Removes the specified set of plot elements
+theme_remove <- function(elems) {
+    set_names(elems) %>%
+        map(~element_blank()) %>%
+        exec(theme, !!!.)
+}
+
+## Plot assignments
 gg <- ggplot(Z, aes(x=Name, y=Challenge, fill=Interest)) +
     geom_tile() + theme_minimal() + xlab("Registrant") +
-    geom_tile(data=filter(Z, Assigned=="Yes"), color="black", size=1) +
-    scale_fill_brewer(palette="Reds", na.value="gray90", na.translate=FALSE) +
-    exec(theme, !!!petr)
+    geom_tile(data=ZA, aes(color=Assignment), size=0.5) +
+    geom_text(data=ZA, aes(color=Assignment, label=Experience)) +
+    geom_text(data=filter(ZA, GPU=="Yes"), label="_" ) +
+    scale_fill_brewer(palette="Blues") +
+    scale_color_manual(values=c("Experience"="black", "Has GPU"="black")) +
+    guides(
+        fill  = guide_legend(override.aes = list(color=NA)),
+        color = guide_legend(override.aes = list(fill="white", label=c("3","_")))) +
+    theme_remove(c("axis.text.x", "axis.ticks.x",
+                   "panel.grid.major", "panel.grid.minor"))
 
 ggsave("plots/assignments.pdf", gg, width=14, height=5)
