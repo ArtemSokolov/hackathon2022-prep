@@ -9,7 +9,7 @@ il <- c("Very interested"     = 3,
 ## Load cleaned registrant data + team assignments
 X <- read_csv("data/assignment.csv", col_types=cols())
 ct <- X %>% select(`01-artifacts`:`12-cosmetic`) %>% colnames()
-   
+
 ## Compute the distance matrix (DM) based on registrant interest
 DM <- X %>% select(Name, all_of(ct)) %>%
     mutate_at(ct, recode, !!!il) %>% as.data.frame() %>%
@@ -35,18 +35,26 @@ theme_remove <- function(elems) {
         exec(theme, !!!.)
 }
 
-## Plot assignments
-gg <- ggplot(Z, aes(x=Name, y=Challenge, fill=Interest)) +
+## Plot interest by itself
+ggi <- ggplot(Z, aes(x=Name, y=Challenge, fill=Interest)) +
     geom_tile() + theme_minimal() + xlab("Registrant") +
-    geom_tile(data=ZA, aes(color=Assignment), size=0.5) +
-    geom_text(data=ZA, aes(color=Assignment, label=Experience)) +
-    geom_text(data=filter(ZA, GPU=="Yes"), label="_" ) +
     scale_fill_brewer(palette="Blues") +
-    scale_color_manual(values=c("Experience"="black", "Has GPU"="black")) +
-    guides(
-        fill  = guide_legend(override.aes = list(color=NA)),
-        color = guide_legend(override.aes = list(fill="white", label=c("3","_")))) +
     theme_remove(c("axis.text.x", "axis.ticks.x",
                    "panel.grid.major", "panel.grid.minor"))
 
+ggsave("plots/interest.pdf", ggi, width=14, height=5)
+ggsave("plots/interest.png", ggi, width=14, height=5)
+
+## Overlay assignments
+gg <- ggi +
+    geom_tile(data=ZA, aes(color=Assignment), size=0.5) +
+    geom_text(data=ZA, aes(color=Assignment, label=Experience)) +
+    geom_text(data=filter(ZA, GPU=="Yes"), label="_" ) +
+    scale_color_manual(values=c("Experience"="black", "Has GPU"="black")) +
+    guides(
+        fill  = guide_legend(override.aes = list(color=NA)),
+        color = guide_legend(override.aes = list(fill="white", label=c("3","_"))))
+
 ggsave("plots/assignments.pdf", gg, width=14, height=5)
+ggsave("plots/assignments.png", gg, width=14, height=5)
+

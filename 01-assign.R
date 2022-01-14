@@ -33,10 +33,18 @@ sn <- set_names(10:21, ct) %>%
       GPU         = 9)
 
 ## Load and clean up all registrant information
+## Resolve duplicate entries by taking the more recent one
 X <- read_csv(ifn, col_types=cols()) %>%
     rename(!!!sn) %>% select(-Timestamp) %>%
     group_by(Email) %>% slice(n()) %>% ungroup() %>%
     mutate(across(all_of(ct), replace_na,  "Not interested"))
+
+## Identify and display any duplicate names for manual verification
+cat("Entries with identical names:\n")
+X %>% group_by(Name) %>% filter(n()>1) %>% select(Name, Email)
+
+## Remove the duplicates (assuming that they pass manual inspection)
+X <- X %>% group_by(Name) %>% slice(n()) %>% ungroup()
 
 stopifnot(anyNA(X)==FALSE)
 nc <- length(ct)           # Number of challenges
