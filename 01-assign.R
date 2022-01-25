@@ -97,7 +97,7 @@ Z <- lpSolve::lp(direction    = 'max',
 z <- Z$solution
 
 ## Quick checks
-w[z]
+w[as.logical(z)]
 matrix(z, np, nc) %>% rowSums()
 matrix(z, np, nc) %>% colSums()
 
