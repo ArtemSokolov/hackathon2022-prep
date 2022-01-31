@@ -41,6 +41,7 @@ X <- read_csv(ifn, col_types=cols()) %>%
     rename(!!!sn) %>% filter( !(Email %in% excl) ) %>%
     group_by(Email) %>% slice(n()) %>% ungroup() %>%
     mutate(across(all_of(ct), replace_na,  "Not interested"))
+stopifnot(anyNA(X)==FALSE)
 
 ## The endosomes challenge has been cancelled
 X <- X %>% select(-Timestamp, -endosomes)
@@ -53,7 +54,10 @@ X %>% group_by(Name) %>% filter(n()>1) %>% select(Name, Email)
 ## Remove the duplicates (assuming that they pass manual inspection)
 X <- X %>% group_by(Name) %>% slice(n()) %>% ungroup()
 
-stopifnot(anyNA(X)==FALSE)
+## Randomly shuffle the registrants
+set.seed(42)
+X <- slice(X, sample(1:n()))
+
 nc <- length(ct)           # Number of challenges
 np <- nrow(X)              # Number of people
 
@@ -84,13 +88,13 @@ MAT[[3]] <- map(1:nc, ~`[<-`(-diag(nc)[-.x,],,.x,1)) %>%
 DIR[[3]] <- rep("<=", nc*(nc-1))
 RHS[[3]] <- rep(1, nc*(nc-1))
 
-## 4. Each challenge includes at least one person with a GPU
+## 4. Each challenge includes enough GPUs
 MAT[[4]] <- kronecker( diag(nc), t(as.integer(X$GPU == "Yes")) )
 DIR[[4]] <- rep(">=", nc)
-RHS[[4]] <- rep(1, nc)
+RHS[[4]] <- rep(3, nc)
 
 ## 5. Each challenge includes adequate image analysis expertise
-MAT[[5]] <- kronecker( diag(nc), t(as.integer(X$Experience >= 4)) )
+MAT[[5]] <- kronecker( diag(nc), t(as.integer(X$Experience >= 5)) )
 DIR[[5]] <- rep(">=", nc)
 RHS[[5]] <- rep(1, nc)
 
@@ -115,7 +119,12 @@ Y <- matrix(z, np, nc) %>% apply(1, which.max) %>% ct[.] %>%
 ## Additional checks
 Y %>% group_by(Assignment) %>%
     summarize(nGPU    = sum(GPU == "Yes"),
-              nExpert = sum(Experience >= 4))
+              nExpert = sum(Experience >= 5))
 
 Y %>% select(Assignment, Name, Email, everything()) %>%
     write_csv("data/assignment.csv")
+
+## Isolate a slice to be shared with registrants
+Y %>% select(Assignment, Name, Email, Institution, Experience, Languages, GPU) %>%
+    arrange(Assignment, Name) %>% write_csv("teams.csv")
+

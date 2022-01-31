@@ -8,7 +8,7 @@ il <- c("Very interested"     = 3,
 
 ## Load cleaned registrant data + team assignments
 X <- read_csv("data/assignment.csv", col_types=cols())
-ct <- X %>% select(`01-artifacts`:`12-cosmetic`) %>% colnames()
+ct <- X %>% select(`01-artifacts`:`11-cosmetic`) %>% colnames()
 
 ## Compute the distance matrix (DM) based on registrant interest
 DM <- X %>% select(Name, all_of(ct)) %>%
@@ -35,10 +35,16 @@ theme_remove <- function(elems) {
         exec(theme, !!!.)
 }
 
+## Shorthand for bold element_text of specific size
+etxt <- function(s, ...) element_text(size = s, face='bold', ...)
+
 ## Plot interest by itself
 ggi <- ggplot(Z, aes(x=Name, y=Challenge, fill=Interest)) +
     geom_tile() + theme_minimal() + xlab("Registrant") +
     scale_fill_brewer(palette="Blues") +
+    theme(legend.position="bottom",
+          legend.title = etxt(12), legend.text = etxt(10),
+          axis.title = etxt(12), axis.text = etxt(10)) +
     theme_remove(c("axis.text.x", "axis.ticks.x",
                    "panel.grid.major", "panel.grid.minor"))
 
