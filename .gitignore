@@ -1,4 +1,5 @@
 # Data and plots
+data/*
 *.csv
 *.pdf
 *.png

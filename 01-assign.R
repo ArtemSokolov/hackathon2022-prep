@@ -19,8 +19,8 @@ ct <- c("01-artifacts",
         "08-thumbnails",
         "09-galaxy",
         "10-neuroglancer",
-        "11-endosomes",
-        "12-cosmetic")
+        "endosomes",		## Endosomes challenge is cancelled
+        "11-cosmetic")
 
 ## Shorthand notations (sn) for column names
 sn <- set_names(10:21, ct) %>%
@@ -32,12 +32,19 @@ sn <- set_names(10:21, ct) %>%
       Languages   = 8,
       GPU         = 9)
 
+## Exclude champions and folks who decided not to participate
+excl <- scan("data/exclude.txt", what=character())
+
 ## Load and clean up all registrant information
-## Resolve duplicate entries by taking the more recent one
+## Resolve duplicate email entries by taking the more recent one
 X <- read_csv(ifn, col_types=cols()) %>%
-    rename(!!!sn) %>% select(-Timestamp) %>%
+    rename(!!!sn) %>% filter( !(Email %in% excl) ) %>%
     group_by(Email) %>% slice(n()) %>% ungroup() %>%
     mutate(across(all_of(ct), replace_na,  "Not interested"))
+
+## The endosomes challenge has been cancelled
+X <- X %>% select(-Timestamp, -endosomes)
+ct <- setdiff(ct, "endosomes")
 
 ## Identify and display any duplicate names for manual verification
 cat("Entries with identical names:\n")
