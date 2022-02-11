@@ -29,20 +29,15 @@ sn <- set_names(10:21, ct) %>%
       Languages   = 8,
       GPU         = 9)
 
-## Exclude champions and folks who decided not to participate
-excl <- scan("data/exclude.txt", what=character())
-
 ## Current team assignments
-X <- read_csv("data/current.csv", col_types=cols())
+X <- read_csv("data/assignments.csv", col_types=cols())
 X %>% group_by(Assignment) %>% summarize(n())
 
 ## Current list of registrants
-Y <- read_csv("data/updated.csv", col_types=cols()) %>%
-    rename(!!!sn) %>% filter( !(Email %in% excl) ) %>%
+Y <- read_csv("data/tidy.csv", col_types=cols()) %>%
+    rename(!!!sn) %>% mutate_at(ct, recode, !!!il) %>%
     filter( !(Name %in% X$Name) ) %>%
-    mutate_at(ct, recode, !!!il) %>%
     select(Name, all_of(ct), -endosomes) %>%
     gather(Challenge, Interest, -Name) %>%
-    filter(Interest == 3)
-    
-Y %>% group_by(Challenge) %>% summarize(n())
+    filter(Interest == 3) %>% arrange(Name)
+
