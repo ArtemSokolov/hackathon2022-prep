@@ -1,18 +1,13 @@
 library(tidyverse)
 library(seriation)
 
-## Intereset level (il)
-il <- c("Very interested"     = 3,
-        "Somewhat interested" = 2,
-        "Not interested"      = 1)
-
 ## Load cleaned registrant data + team assignments
 X <- read_csv("data/assignment.csv", col_types=cols())
 ct <- X %>% select(`01-artifacts`:`11-cosmetic`) %>% colnames()
 
 ## Compute the distance matrix (DM) based on registrant interest
 DM <- X %>% select(Name, all_of(ct)) %>%
-    mutate_at(ct, recode, !!!il) %>% as.data.frame() %>%
+    mutate_at(ct, recode, !!!g_il) %>% as.data.frame() %>%
     column_to_rownames("Name") %>% dist()
 
 ## Compute optimal leaf ordering (olo) from hierarchical clustering

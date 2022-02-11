@@ -1,36 +1,8 @@
 library(tidyverse)
+source("common.R")
 
 ## Input filename (ifn)
 ifn <- "data/CSBC_PS-ON Image Analysis Hackathon 2022 (Responses) - Form Responses 1.csv"
-
-## Intereset level (il)
-il <- c("Very interested"     = 3,
-        "Somewhat interested" = 2,
-        "Not interested"      = 1)
-
-## Challenge tags (ct)
-ct <- c("01-artifacts",
-        "02-segmentation",
-        "03-virtual-IF",
-        "04-VAE",
-        "05-cross-talk",
-        "06-viz-comp",
-        "07-TB-scale",
-        "08-thumbnails",
-        "09-galaxy",
-        "10-neuroglancer",
-        "endosomes",		## Endosomes challenge is cancelled
-        "11-cosmetic")
-
-## Shorthand notations (sn) for column names
-sn <- set_names(10:21, ct) %>%
-    c(Email       = 2,
-      Institution = 4,
-      Stage       = 5,
-      Network     = 6,
-      Experience  = 7,
-      Languages   = 8,
-      GPU         = 9)
 
 ## Exclude champions and folks who decided not to participate
 excl <- scan("data/exclude.txt", what=character())
@@ -38,14 +10,14 @@ excl <- scan("data/exclude.txt", what=character())
 ## Load and clean up all registrant information
 ## Resolve duplicate email entries by taking the more recent one
 X <- read_csv(ifn, col_types=cols()) %>%
-    rename(!!!sn) %>% filter( !(Email %in% excl) ) %>%
+    rename(!!!g_sn) %>% filter( !(Email %in% excl) ) %>%
     group_by(Email) %>% slice(n()) %>% ungroup() %>%
-    mutate(across(all_of(ct), replace_na,  "Not interested"))
+    mutate(across(all_of(g_ct), replace_na,  "Not interested"))
 stopifnot(anyNA(X)==FALSE)
 
 ## The endosomes challenge has been cancelled
 X <- X %>% select(-Timestamp, -endosomes)
-ct <- setdiff(ct, "endosomes")
+ct <- setdiff(g_ct, "endosomes")
 
 ## Identify and display any duplicate names for manual verification
 cat("Entries with identical names:\n")
@@ -63,7 +35,7 @@ np <- nrow(X)              # Number of people
 
 ## Maximize the interest of participants
 w <- X %>% select(all_of(ct)) %>%
-    mutate(across(everything(), recode, !!!il)) %>%
+    mutate(across(everything(), recode, !!!g_il)) %>%
     as.matrix() %>% c()
 
 ## Such that...
