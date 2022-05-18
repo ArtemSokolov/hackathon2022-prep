@@ -4,9 +4,7 @@ image:
 tasks:
   - init: |
       eval $(command gp env -e)
-      mkdir -p output
-      mkdir -p plots
-      mkdir -p data/aucs
+      mkdir -p data
       R -s -e "synapser::synLogin('$SYN_USER','$SYN_TOKEN'); source('00-syn.R')"
 
 vscode:

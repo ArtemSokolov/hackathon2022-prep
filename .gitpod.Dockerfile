@@ -15,4 +15,4 @@ ENV HOME=/home/gitpod
 WORKDIR $HOME
 USER gitpod
 
-RUN echo 'export PS1="\e[01;34m\w\e[0m$ "' >> $HOME/.bashrc
+RUN echo 'export PS1="\e[01;34m\w\e[0m\$(__git_ps1 \" (%s)\") $ "' >> $HOME/.bashrc
