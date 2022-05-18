@@ -1,0 +1,14 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: |
+      eval $(command gp env -e)
+      mkdir -p output
+      mkdir -p plots
+      mkdir -p data/aucs
+      R -s -e "synapser::synLogin('$SYN_USER','$SYN_TOKEN'); source('00-syn.R')"
+
+vscode:
+  extensions:
+    - Ikuyadeu.r
