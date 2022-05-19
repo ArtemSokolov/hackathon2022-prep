@@ -4,7 +4,7 @@ RUN R -e 'install.packages("languageserver")'
 RUN R -e 'install.packages("synapser", repos=c("http://ran.synapse.org", "http://cran.fhcrc.org"))'
 RUN R -e 'remotes::install_github("ArtemSokolov/synExtra")'
 
-RUN R -e 'install.packages(c("ggrepel", "cowplot"))'
+RUN R -e 'install.packages(c("ggrepel", "cowplot", "seriation", "UpSetR", "maptools"))'
 
 ### Gitpod user ###
 # '-l': see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user

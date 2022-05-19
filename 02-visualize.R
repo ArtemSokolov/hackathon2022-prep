@@ -2,7 +2,7 @@ library(tidyverse)
 library(seriation)
 
 ## Load cleaned registrant data + team assignments
-X <- read_csv("data/assignment.csv", col_types=cols())
+X <- read_csv("data/assignments.csv", col_types=cols())
 ct <- X %>% select(`01-artifacts`:`11-cosmetic`) %>% colnames()
 
 ## Compute the distance matrix (DM) based on registrant interest
