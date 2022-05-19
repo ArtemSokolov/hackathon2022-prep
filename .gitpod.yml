@@ -5,6 +5,7 @@ tasks:
   - init: |
       eval $(command gp env -e)
       mkdir -p data
+      mkdir -p plots
       R -s -e "synapser::synLogin('$SYN_USER','$SYN_TOKEN'); source('00-syn.R')"
 
 vscode:
