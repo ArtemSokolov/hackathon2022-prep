@@ -1,18 +1,24 @@
 library(tidyverse)
 library(seriation)
 
-## Load cleaned registrant data + team assignments
-X <- read_csv("data/assignments.csv", col_types=cols())
-ct <- X %>% select(`01-artifacts`:`11-cosmetic`) %>% colnames()
+source("common.R")
 
-## Compute the distance matrix (DM) based on registrant interest
-DM <- X %>% select(Name, all_of(ct)) %>%
-    mutate_at(ct, recode, !!!g_il) %>% as.data.frame() %>%
-    column_to_rownames("Name") %>% dist()
+## Load cleaned registrant data (rgs) + team assignments (asm)
+rgs <- load_registration("data/tidy.csv")
+asm <- read_csv("data/assignments.csv", col_types = cols())
+ct <- rgs %>% select(`01-artifacts`:`11-cosmetic`) %>% colnames()
+
+## Compute the distance matrix (dmat) based on registrant interest
+dmat <- select(rgs, Name, all_of(ct)) %>%
+    as.data.frame() %>%
+    column_to_rownames("Name") %>%
+    dist()
 
 ## Compute optimal leaf ordering (olo) from hierarchical clustering
-olo <- hclust(DM) %>% reorder(DM) %>%
-    dendextend::order.hclust() %>% labels(DM)[.]
+olo <- hclust(dmat) %>%
+    reorder(dmat) %>%
+    dendextend::order.hclust() %>%
+    labels(dmat)[.]
 
 ## Overall view of registrant interest in the challenges
 ## Abusing Assignment column to store legend labels
