@@ -4,7 +4,7 @@ RUN R -e 'install.packages("languageserver")'
 RUN R -e 'install.packages("synapser", repos=c("http://ran.synapse.org", "http://cran.fhcrc.org"))'
 RUN R -e 'remotes::install_github("ArtemSokolov/synExtra")'
 
-RUN R -e 'install.packages(c("ggrepel", "cowplot", "UpSetR", "maptools"))'
+RUN R -e 'install.packages(c("ggrepel", "cowplot", "UpSetR", "maptools", "maps", "scatterpie"))'
 RUN R -e 'install.packages(c("seriation", "dendextend"))'
 
 ### Gitpod user ###

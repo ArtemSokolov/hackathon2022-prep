@@ -27,7 +27,8 @@ load_registration <- function(fn) {
           GPU         = 9)
 
     ## Read a list of registrants and clean it up
-    read_csv(fn, col_types=cols()) %>%
-        rename(!!!sn) %>% select(-endosomes) %>%
+    read_csv(fn, col_types = cols()) %>%
+        rename(!!!sn) %>%
+        select(-endosomes) %>%
         mutate(across(`01-artifacts`:`11-cosmetic`, recode, !!!il))
 }
